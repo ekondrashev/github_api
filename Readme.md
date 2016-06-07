@@ -17,7 +17,7 @@ Cmdline tool to create PR by branch name.
 `branch_by_github_issue.py -o teamed -r xockets-xjm -i 737 -u ekondrashev`
 
 where
-`-o` is an owner of a repo
-`-r` is a repo name
-`-i` is issue number
-`-u` account name to access the GitHub, optional for public repos
+ * `-o` is an owner of a repo
+ * `-r` is a repo name
+ * `-i` is issue number
+ * `-u` account name to access the GitHub, optional for public repos
