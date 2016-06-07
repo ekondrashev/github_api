@@ -18,7 +18,6 @@ parser.add_argument('-o', '--owner')
 parser.add_argument('-r', '--repo')
 parser.add_argument('-u', '--user', default='ekondrashev')
 parser.add_argument('-c', '--create', default=False)
-parser.add_argument('-v', '--verbose', default=True)
 
 
 class GitHub(object):
