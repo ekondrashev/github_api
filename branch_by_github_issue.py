@@ -1,12 +1,13 @@
 #!/usr/bin/python
 '''
-Command line tool to get branch name by github issue number.
+Command line tool to get/create branch name by GitHub issue number.
 
 @author: ekondrashev
 '''
 import argparse
 import base64
 import json
+import subprocess
 import urllib2
 from collections import namedtuple
 from getpass import getpass
@@ -16,6 +17,7 @@ parser.add_argument('-i', '--issue', type=int)
 parser.add_argument('-o', '--owner')
 parser.add_argument('-r', '--repo')
 parser.add_argument('-u', '--user', default='ekondrashev')
+parser.add_argument('-c', '--create', default=False)
 parser.add_argument('-v', '--verbose', default=True)
 
 
@@ -44,8 +46,34 @@ def branch_name_by_issue(issue):
     return '%d_%s' % (issue.nr, issue.title.replace(' ', '_').lower())
 
 
-if __name__ == "__main__":
-    args = parser.parse_args()
+class Git(object):
+
+    class Branch(object):
+        def __init__(self, name):
+            self.name = name
+
+        def co(self, create=False):
+            cmdline = ['git', 'checkout']
+            if create:
+                cmdline.append('-b')
+            cmdline.append(self.name)
+            print subprocess.check_output(cmdline)
+
+    def pull(self, rebase=True):
+        cmdline = ['git', 'pull']
+        if rebase:
+            cmdline.append('--rebase')
+        print subprocess.check_output(cmdline)
+
+    def st(self):
+        print subprocess.check_output('git st'.split())
+
+    def dirty(self):
+        return len(subprocess.check_output(
+            'git status --porcelain'.split()).strip()) > 0
+
+
+def main(args):
     repo = GitHub.Repo(args.repo, args.owner)
     account = GitHub.Account(
         args.user,
@@ -53,4 +81,18 @@ if __name__ == "__main__":
      )
     github = GitHub(repo, account)
     issue = github.issue(args.issue)
-    print branch_name_by_issue(issue)
+    branch = Git.Branch(branch_name_by_issue(issue))
+    print 'Branch name: ', branch.name
+    if args.create:
+        git = Git()
+        if git.dirty():
+            print 'There are changes done to the repo, commit/reset first'
+            return
+        Git.Branch('master').co()
+        git.pull()
+        git.st()
+        branch.co(create=True)
+
+if __name__ == "__main__":
+    args = parser.parse_args()
+    main(args)
