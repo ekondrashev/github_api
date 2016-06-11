@@ -42,7 +42,9 @@ class GitHub(object):
 
 
 def branch_name_by_issue(issue):
-    return '%d_%s' % (issue.nr, issue.title.replace(' ', '_').lower())
+    return '%d_%s' % (issue.nr, issue.title
+	.replace(' ', '_').replace(':', '_').replace('-', '_')
+	.replace('.', '_').strip('_').lower())
 
 
 class Git(object):
