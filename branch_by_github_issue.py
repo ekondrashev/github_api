@@ -7,6 +7,7 @@ Command line tool to get/create branch name by GitHub issue number.
 import argparse
 import base64
 import json
+import re
 import subprocess
 import urllib2
 from collections import namedtuple
@@ -42,9 +43,8 @@ class GitHub(object):
 
 
 def branch_name_by_issue(issue):
-    return '%d_%s' % (issue.nr, issue.title
-	.replace(' ', '_').replace(':', '_').replace('-', '_')
-	.replace('.', '_').strip('_').lower())
+    return '%d_%s' % (issue.nr, re.sub(r'[.,\-\s:]', '_', issue.title)
+	.strip('_').lower())
 
 
 class Git(object):
