@@ -9,6 +9,7 @@ import base64
 import json
 import re
 import subprocess
+import sys
 import urllib2
 from collections import namedtuple
 from getpass import getpass
@@ -84,7 +85,7 @@ def main(args):
     issue = github.issue(args.issue)
     branch = Git.Branch(branch_name_by_issue(issue))
     print 'Branch name: ', branch.name
-    if args.create:
+    if args.create and query_yes_no('Would you like to create the branch?'):
         git = Git()
         if git.dirty():
             print 'There are changes done to the repo, commit/reset first'
@@ -93,6 +94,40 @@ def main(args):
         git.pull()
         git.st()
         branch.co(create=True)
+
+import sys
+
+def query_yes_no(question, default="yes"):
+    """Ask a yes/no question via raw_input() and return their answer.
+
+    "question" is a string that is presented to the user.
+    "default" is the presumed answer if the user just hits <Enter>.
+        It must be "yes" (the default), "no" or None (meaning
+        an answer is required of the user).
+
+    The "answer" return value is True for "yes" or False for "no".
+    """
+    valid = {"yes": True, "y": True, "ye": True,
+             "no": False, "n": False}
+    if default is None:
+        prompt = " [y/n] "
+    elif default == "yes":
+        prompt = " [Y/n] "
+    elif default == "no":
+        prompt = " [y/N] "
+    else:
+        raise ValueError("invalid default answer: '%s'" % default)
+
+    while True:
+        sys.stdout.write(question + prompt)
+        choice = raw_input().lower()
+        if default is not None and choice == '':
+            return valid[default]
+        elif choice in valid:
+            return valid[choice]
+        else:
+            sys.stdout.write("Please respond with 'yes' or 'no' "
+                             "(or 'y' or 'n').\n")
 
 if __name__ == "__main__":
     args = parser.parse_args()
